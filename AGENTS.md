@@ -4,17 +4,18 @@
 
 ---
 
-## 1. Kiến Trúc Thư Mục Monorepo & Ranh Giới Trách Nhiệm
+## 1. Kiến Trúc Component-First Đồng Nhất (`src/`) & Ranh Giới Trách Nhiệm
 
-Dự án được tổ chức theo kiến trúc phân tách rõ ràng. AI phải xác định đúng thư mục mục tiêu trước khi sửa code:
+Dự án sử dụng kiến trúc **Unified Component-First 3 Tầng** trong `src/` (tuyệt đối không xé vụn thành nhiều repo/monorepo rời rạc gây trùng lặp `node_modules` và UI components):
 
-| Thư mục | Vai trò & Trách nhiệm | Nguyên tắc bất biến |
+| Phân khu | Vai trò & Trách nhiệm | Nguyên tắc bất biến |
 | :--- | :--- | :--- |
-| [`frontend/`](./frontend/README.md) | Giao diện người dùng, tách thành 3 ứng dụng độc lập: `landing-page/` (SEO/Marketing), `user/` (Web App cho khách hàng), `admin/` (Portal quản trị). | Chỉ xử lý hiển thị UI/UX và trạng thái giao diện. Không chứa logic DB hay khóa bí mật. |
-| [`backend/`](./backend/README.md) | Xử lý API, xác thực, phân quyền RBAC và toàn bộ Business Logic. | Không lưu trạng thái cục bộ (Stateless) để sẵn sàng nhân bản ngang (Zero-Downtime). |
-| [`infra/`](./infra/README.md) | Hạ tầng lưu trữ và vận hành: PostgreSQL, Redis, MinIO, Nginx Gateway, Docker Compose, CI/CD, Monitoring (Grafana, Prometheus, Loki, Tempo). | Mọi thay đổi schema DB phải qua migration an toàn (Expand & Contract), cấm xóa dữ liệu thật. |
-| [`mcp/`](./mcp/README.md) | Máy chủ Model Context Protocol (MCP Server & Gateway) tách biệt để kết nối AI với dữ liệu hệ thống. | Bắt buộc tuân thủ 5 lớp bảo mật: API Key, Session Rate Limit, RBAC Scope, Tool Registry, API Client. |
-| [`docs/`](./docs/) | Kho lưu trữ toàn bộ tài liệu `.md` của dự án theo 6 phân khu. | **CẤM** tạo file `.md` báo cáo hay tài liệu rời rạc ngoài thư mục gốc; bắt buộc đặt đúng phân khu trong `docs/`. |
+| [`src/components/ui/`](./src/README.md) | **Tầng 1 (UI Primitives / Atoms):** `Button`, `Input`, `Modal`, `Skeleton`, `Badge`. | Thuần giao diện, nhận props để render. **CẤM** chứa logic nghiệp vụ, gọi API hoặc import DB. |
+| [`src/features/`](./src/README.md) | **Tầng 2 (Feature Modules):** `src/features/<feature>/` (chứa `components/`, `hooks/`, `schemas/`). | Xử lý nghiệp vụ cụ thể, validate form (Zod + RHF), đủ 4 trạng thái UI (`Loading`, `Error`, `Empty`, `Success`). |
+| [`src/app/`](./src/README.md) | **Tầng 3 (Page Orchestrator & Route Groups):** `(marketing)/`, `(portal)/`, `(admin)/`, `api/`. | File `page.tsx` **chỉ điều phối (< 80 dòng)**, mặc định là Server Component; đẩy `'use client'` xuống tận ngọn lá (Leaf). |
+| [`src/server/`](./src/README.md) | **Backend & Data Layer:** Services, Repositories, Prisma/Drizzle Schema & Migrations, Env Validation (`src/lib/`). | Chuẩn hóa thời gian UTC ISO-8601 (`Z`), Soft Delete, Expand & Contract Migration, Log JSON 13 trường. |
+| [`tests/`](./tests/README.md) | **Kiểm thử tự động:** Playwright E2E (ưu tiên Mobile `375px/390px`), Unit & Integration Test. | Bắt locator theo `data-testid` (`[feature]__[component]--[type]`). Cấm sửa code `src/` để ép test pass. |
+| [`docs/`](./docs/) | **Kho tài liệu sống:** Lưu trữ toàn bộ tài liệu `.md` của dự án theo 6 phân khu. | **CẤM** tạo file `.md` báo cáo hay tài liệu rời rạc ngoài thư mục gốc; bắt buộc đặt đúng phân khu trong `docs/`. |
 
 ---
 

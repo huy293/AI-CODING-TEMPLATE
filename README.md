@@ -9,7 +9,7 @@ $$\text{1. PLAN} \longrightarrow \text{2. DESIGN} \longrightarrow \text{3. BUILD
 ## 1. Triết Lý Cốt Lõi: "Cấu Trúc Trước Khi Viết Prompt"
 
 1. **Không bắt đầu bằng Prompt dài vô tổ chức:** Khi chưa có cấu trúc thư mục và hệ thống file `.md` định hướng, AI sẽ tự chọn "đường ngắn nhất" (nhét toàn bộ logic vào 1 chỗ, tự ý đổi kiến trúc, quên 90% tính năng còn lại khi hội thoại dài).
-2. **Bản đồ điều hướng trung tâm (`AGENTS.md` & `CLAUDE.md`):** Đặt ngay tại thư mục gốc (`root`). Mỗi khi mở phiên làm việc mới, AI tự động đọc file này đầu tiên để hiểu ranh giới Monorepo (`frontend/`, `backend/`, `infra/`, `mcp/`, `docs/`) và nạp bộ quy tắc trong `.claude/` (hoặc `.agents/`).
+2. **Bản đồ điều hướng trung tâm (`AGENTS.md` & `CLAUDE.md`):** Đặt ngay tại thư mục gốc (`root`). Mỗi khi mở phiên làm việc mới, AI tự động đọc file này đầu tiên để hiểu kiến trúc **Unified Component-First 3 Tầng (`src/`)**, thư mục kiểm thử (`tests/`), kho tài liệu (`docs/`) và nạp bộ quy tắc trong `.claude/` (hoặc `.agents/`).
 3. **Phân tách 3 cơ chế nạp ngữ cảnh để tiết kiệm 70%+ Token:**
    - **`.claude/rules/` (Always-On):** Luôn luôn kích hoạt trong mọi lượt hội thoại. Giữ ngắn gọn, chứa các luật bất biến và chữ ký tự động cập nhật (`roadmap-signature.md`, `architecture-signature.md`, `permission-gate.md`, `token-guard.md`).
    - **`.claude/skills/` (Auto-Triggered):** Tự động kích hoạt theo ngữ cảnh. AI chỉ đọc tên + 1 dòng mô tả (tốn vài chục token), khi trúng tác vụ mới mở file `SKILL.md` ra đọc sâu.
@@ -22,7 +22,7 @@ $$\text{1. PLAN} \longrightarrow \text{2. DESIGN} \longrightarrow \text{3. BUILD
 ```mermaid
 flowchart TD
     Entry["AGENTS.md / CLAUDE.md<br/>(Entry Point tại Root)"] --> Brain[".claude/ & .agents/<br/>(6 Thư mục điều khiển AI)"]
-    Entry --> Codebase["Monorepo Tách Biệt<br/>(frontend/ · backend/ · infra/ · mcp/)"]
+    Entry --> Codebase["Unified Component-First 3 Tầng<br/>(src/components/ui · src/features · src/app · src/server)"]
     Entry --> Docs["docs/<br/>(Kho tài liệu dự án chuẩn hóa)"]
 
     subgraph SixFolders ["6 Thư Mục Trong .claude/"]
@@ -51,7 +51,7 @@ flowchart TD
 
 ---
 
-## 3. Cấu Trúc Thư Mục Toàn Dự Án
+## 3. Cấu Trúc Thư Mục Toàn Dự Án (Unified Component-First)
 
 ```text
 AI-CODING-TEMPLATE/
@@ -61,7 +61,7 @@ AI-CODING-TEMPLATE/
 │
 ├── .claude/                            # 6 THƯ MỤC BẮT BUỘC ĐIỀU KHIỂN AI
 │   ├── rules/                          # [Always-On] Luật bất biến luôn nạp trong mọi phiên
-│   │   ├── folder-structure.md         # Quy hoạch phân khu code & cấm vứt file .md ngoài docs/
+│   │   ├── folder-structure.md         # Quy hoạch Component-First 3 tầng (src/) & cấm vứt file .md ngoài docs/
 │   │   ├── roadmap-signature.md        # Bắt buộc cập nhật ROADMAP.md & CHANGELOG.md sau mỗi tính năng
 │   │   ├── architecture-signature.md   # Bắt buộc cập nhật ARCHITECTURE_PLAN.md khi đổi cấu trúc/DB/API
 │   │   ├── permission-gate.md          # Chặn lệnh phá hủy, bảo vệ DB Prod, tích hợp bộ phản xạ JEV
@@ -112,10 +112,14 @@ AI-CODING-TEMPLATE/
 │       ├── CICD_PIPELINE.md            # Quy trình 8 bước CI/CD & 3 chiến lược Zero-Downtime
 │       └── OBSERVABILITY.md            # Chuẩn 13 trường bản ghi Log & Giám sát Grafana/Loki/Tempo
 │
-├── frontend/                           # Tầng Giao diện (Tách 3 phân khu: landing-page/, user/, admin/)
-├── backend/                            # Tầng Xử lý API & Business Logic
-├── infra/                              # Tầng Hạ tầng, Database, Cache, Storage & Monitoring
-└── mcp/                                # Tầng MCP Server & Gateway độc lập
+├── src/                                # MÃ NGUỒN ĐỒNG NHẤT (COMPONENT-FIRST 3 TẦNG)
+│   ├── components/ui/                  # Tầng 1: UI Primitives (Button, Input, Modal, Skeleton - thuần UI)
+│   ├── features/                       # Tầng 2: Feature Modules (components, hooks, schemas theo từng nghiệp vụ)
+│   ├── app/                            # Tầng 3: Page Orchestrator (< 80 dòng/file, Route Groups: (marketing), (portal), (admin), api/)
+│   ├── server/                         # Backend Services, Repositories, DB Schema/Migrations
+│   ├── lib/                            # Shared Utilities, Env Validation (Zod), Structured Logger 13 trường
+│   └── mocks/                          # Dữ liệu giả lập cách ly (*.mock.json)
+└── tests/                              # Kiểm thử tự động (Playwright E2E Mobile-First, Unit, Integration)
 ```
 
 ---

@@ -1,20 +1,19 @@
 ---
 trigger: always_on
-description: Quy hoạch cấu trúc thư mục Monorepo và quy tắc lưu trữ tài liệu .md trong docs/
+description: Quy hoạch cấu trúc Component-First 3 tầng (src/) và quy tắc lưu trữ tài liệu .md trong docs/
 ---
 
-# RULE 01: FOLDER STRUCTURE & MODULE ISOLATION (LUÔN KÍCH HOẠT)
+# RULE 01: COMPONENT-FIRST FOLDER STRUCTURE & MODULE ISOLATION (LUÔN KÍCH HOẠT)
 
-## 1. Phân Định Ranh Giới 5 Phân Khu Cốt Lõi
-Mọi đoạn mã và tài liệu do AI tạo ra bắt buộc đặt đúng phân khu:
-1. **`frontend/`**: Chứa giao diện người dùng, tách biệt rõ 3 phân hệ:
-   - `frontend/landing-page/`: Trang giới thiệu, blog, tối ưu SEO/SSR.
-   - `frontend/user/`: Ứng dụng chính phục vụ khách hàng/người dùng cuối.
-   - `frontend/admin/`: Hệ thống quản trị nội bộ, thống kê, phân quyền RBAC.
-2. **`backend/`**: Chứa API Server, xác thực, xử lý nghiệp vụ (Business Logic). Tuyệt đối không lưu file upload hay trạng thái phiên trực tiếp trên ổ cứng container.
-3. **`infra/`**: Chứa cấu hình hạ tầng (`docker-compose.yml`, Nginx Gateway, PostgreSQL migrations/backups, Redis, MinIO, Prometheus/Grafana/Loki/Tempo).
-4. **`mcp/`**: Chứa MCP Server & MCP Gateway độc lập (5 lớp bảo mật) để kết nối AI với dữ liệu hệ thống.
-5. **`docs/`**: Kho lưu trữ toàn bộ tài liệu `.md` của dự án.
+## 1. Kiến Trúc Thống Nhất `src/` (Chống Phân Mảnh Monorepo Thừa Thãi)
+Tuyệt đối không tự ý xé nhỏ dự án thành nhiều sub-repo rời rạc (`frontend/landing-page`, `frontend/user`, `frontend/admin`) gây trùng lặp `node_modules` và UI components. Toàn bộ mã nguồn tuân thủ **Component-First 3 Tầng** trong `src/`:
+1. **`src/components/ui/` (Tầng 1 — UI Primitives / Atoms):** Chứa linh kiện thuần giao diện (`Button`, `Input`, `Modal`, `Skeleton`). Cấm chứa logic nghiệp vụ, gọi API hoặc import DB.
+2. **`src/features/<feature>/` (Tầng 2 — Feature Components & Domain Logic):** Chứa `components/`, `hooks/`, `schemas/` (Zod + RHF) xử lý từng nghiệp vụ cụ thể và đảm bảo đủ 4 trạng thái UI (`Loading`, `Error`, `Empty`, `Success`).
+3. **`src/app/` (Tầng 3 — Page Orchestrator & Route Groups):**
+   - Dùng Route Groups `(marketing)/`, `(portal)/`, `(admin)/` và `api/` để phân tách phân hệ mà vẫn dùng chung 100% UI Primitives & Types.
+   - File `page.tsx` **chỉ điều phối (tối đa 50–80 dòng)**, mặc định là Server Component; đẩy `'use client'` xuống tận ngọn lá (Leaf).
+4. **`src/server/` & `src/lib/`:** Chứa Services, Repositories, Database Schema/Migrations, Fail-fast Env Validation (Zod) và Structured Logger 13 trường.
+5. **`src/mocks/` & `tests/`:** Chứa dữ liệu giả lập cách ly (`*.mock.json`) và kịch bản kiểm thử tự động (Playwright E2E Mobile-First).
 
 ## 2. Kỷ Luật Lưu Trữ Tài Liệu `.md` (Chống Rác Thư Mục Gốc)
 - **CẤM** tạo file `.md` mới tràn lan ở thư mục gốc (`root`), ngoại trừ `README.md`, `AGENTS.md`, `CLAUDE.md`.

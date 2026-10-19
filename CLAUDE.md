@@ -3,7 +3,7 @@
 > Tệp này được liên kết đồng bộ với [`AGENTS.md`](./AGENTS.md) để đảm bảo **Claude Code**, **Antigravity**, **Cursor** và **Codex** đều đọc chung một nguồn sự thật duy nhất (Single Source of Truth) ngay khi khởi tạo phiên làm việc.
 
 ## 1. Thứ Tự Đọc Ngữ Cảnh Khi Mở Phiên Mới
-1. Đọc [`AGENTS.md`](./AGENTS.md) để nắm cấu trúc Monorepo (`frontend/`, `backend/`, `infra/`, `mcp/`, `docs/`).
+1. Đọc [`AGENTS.md`](./AGENTS.md) để nắm cấu trúc Unified Component-First 3 tầng (`src/`, `tests/`, `docs/`).
 2. Nạp các quy tắc bất biến trong [`.claude/rules/`](./.claude/rules/).
 3. Kiểm tra tiến độ hiện tại trong [`docs/ROADMAP.md`](./docs/ROADMAP.md) và tệp bàn giao [`docs/ops/HANDOFF.md`](./docs/ops/HANDOFF.md) (nếu tiếp tục công việc từ Agent trước).
 
