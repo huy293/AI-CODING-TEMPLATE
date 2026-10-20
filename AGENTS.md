@@ -4,17 +4,24 @@
 
 ---
 
-## 1. Kiến Trúc Component-First Đồng Nhất (`src/`) & Ranh Giới Trách Nhiệm
+## 1. Cổng Tuyển Chọn Tech Stack Theo Bài Toán & Kiến Trúc 3 Tầng (`src/`)
 
-Dự án sử dụng kiến trúc **Unified Component-First 3 Tầng** trong `src/` (tuyệt đối không xé vụn thành nhiều repo/monorepo rời rạc gây trùng lặp `node_modules` và UI components):
+> **CẤM AUTO-JS BIAS:** Khi khởi tạo dự án mới mà người dùng chưa chỉ định công nghệ, AI **TUYỆT ĐỐI CẤM** mặc định chọn JavaScript/Next.js. Bắt buộc phân tích bài toán và đề xuất **Option Matrix (2–3 Tech Stacks)** phù hợp nhất:
+> - **AI / LLM / RAG / Data Pipeline / Crawler / Automation:** Ưu tiên **Python 3.12+** (`FastAPI`, `Pydantic`, `uv`, `Polars`, `LangGraph`).
+> - **High-Concurrency API / Realtime / Microservice / CLI Tool:** Ưu tiên **Go (Golang)** hoặc **Rust** (`Axum`, `Tokio`).
+> - **Cross-Platform Mobile / Desktop App:** Ưu tiên **Flutter (Dart 3)** hoặc **React Native**.
+> - **Enterprise / Core Finance / ERP:** Ưu tiên **C# (.NET 8+)**, **Java 21+ (Spring Boot 3)**, **Go**, hoặc **NestJS**.
+> - **Web App / SaaS Portal / SEO Landing Page:** Chọn **Next.js / React / TypeScript** (hoặc **Astro / Vite** nếu cần nhẹ).
 
-| Phân khu | Vai trò & Trách nhiệm | Nguyên tắc bất biến |
+Dự án sử dụng kiến trúc **Unified 3-Tier Architecture** trong `src/` (tuyệt đối không xé vụn thành nhiều repo/monorepo rời rạc):
+
+| Phân khu | Vai trò & Trách nhiệm (Quy chiếu đa ngôn ngữ) | Nguyên tắc bất biến |
 | :--- | :--- | :--- |
-| [`src/components/ui/`](./src/README.md) | **Tầng 1 (UI Primitives / Atoms):** `Button`, `Input`, `Modal`, `Skeleton`, `Badge`. | Thuần giao diện, nhận props để render. **CẤM** chứa logic nghiệp vụ, gọi API hoặc import DB. |
-| [`src/features/`](./src/README.md) | **Tầng 2 (Feature Modules):** `src/features/<feature>/` (chứa `components/`, `hooks/`, `schemas/`). | Xử lý nghiệp vụ cụ thể, validate form (Zod + RHF), đủ 4 trạng thái UI (`Loading`, `Error`, `Empty`, `Success`). |
-| [`src/app/`](./src/README.md) | **Tầng 3 (Page Orchestrator & Route Groups):** `(marketing)/`, `(portal)/`, `(admin)/`, `api/`. | File `page.tsx` **chỉ điều phối (< 80 dòng)**, mặc định là Server Component; đẩy `'use client'` xuống tận ngọn lá (Leaf). |
-| [`src/server/`](./src/README.md) | **Backend & Data Layer:** Services, Repositories, Prisma/Drizzle Schema & Migrations, Env Validation (`src/lib/`). | Chuẩn hóa thời gian UTC ISO-8601 (`Z`), Soft Delete, Expand & Contract Migration, Log JSON 13 trường. |
-| [`tests/`](./tests/README.md) | **Kiểm thử tự động:** Playwright E2E (ưu tiên Mobile `375px/390px`), Unit & Integration Test. | Bắt locator theo `data-testid` (`[feature]__[component]--[type]`). Cấm sửa code `src/` để ép test pass. |
+| [`src/components/ui/`](./src/README.md) | **Tầng 1 (UI Primitives / Core Atoms):** `components/ui/` (Web), `widgets/common/` (Flutter), `core/primitives/` (Python/Go/Rust). | Thuần cơ bản, không chứa logic nghiệp vụ, không gọi API hay import DB. |
+| [`src/features/`](./src/README.md) | **Tầng 2 (Feature / Domain Modules):** `features/<feat>/` hoặc `internal/<domain>/`. | Xử lý nghiệp vụ cụ thể, validation (Zod / Pydantic / Go Validator / Freezed), đủ 4 trạng thái UI. |
+| [`src/app/`](./src/README.md) | **Tầng 3 (Orchestrator / Router / Controller):** `page.tsx` (Next.js), `routers/` (FastAPI), `handlers/` (Go/Rust), `screens/` (Flutter). | **Chỉ điều phối (< 80 dòng)**; nếu là Web SSR thì đẩy `'use client'` xuống tận ngọn lá (Leaf). |
+| [`src/server/`](./src/README.md) | **Backend & Data Layer:** Services, Repositories, DB Schema & Migrations, Fail-fast Env Validation (`src/lib/`). | Chuẩn hóa thời gian UTC ISO-8601 (`Z`), Soft Delete, Expand & Contract Migration, Log JSON 13 trường. |
+| [`tests/`](./tests/README.md) | **Kiểm thử tự động:** Playwright E2E, `pytest` (Python), `go test` (Go), `cargo test` (Rust), `flutter test` (Dart). | Bắt locator theo `data-testid` (với UI). Cấm sửa code `src/` để ép test pass. |
 | [`docs/`](./docs/) | **Kho tài liệu sống:** Lưu trữ toàn bộ tài liệu `.md` của dự án theo 6 phân khu. | **CẤM** tạo file `.md` báo cáo hay tài liệu rời rạc ngoài thư mục gốc; bắt buộc đặt đúng phân khu trong `docs/`. |
 
 ---
